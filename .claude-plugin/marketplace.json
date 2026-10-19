@@ -1,17 +1,29 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "backend-agent-kit",
-  "description": "The backend-agent-kit plugin: process skills, commands, agents and hooks for multi-agent backend development with Claude Code.",
-  "owner": { "name": "Harsh Bhatia", "url": "https://github.com/erharshbhatia" },
+  "description": "Graph engineering for backend builds with Claude Code: tasks as contracted nodes, fresh verifiers and hard anchors on every edge, waves of parallel agents coordinated as code, and a process (tech doc, plan, ledgers, change records, ADRs) with stack scaffolds that enforce the standards.",
+  "owner": {
+    "name": "Harsh Bhatia",
+    "url": "https://github.com/erharshbhatia"
+  },
   "plugins": [
     {
       "name": "backend-agent-kit",
       "version": "0.3.0",
-      "source": { "source": "github", "repo": "erharshbhatia/backend-agent-kit" },
-      "description": "Tech doc to plan to phased multi-agent build, with ledgers, change records, ADRs and enforced engineering standards.",
+      "source": {
+        "source": "github",
+        "repo": "erharshbhatia/backend-agent-kit"
+      },
+      "description": "Tech doc to plan to waves of contracted, verified, anchored agent tasks, with ledgers, change records, ADRs and enforced engineering standards.",
       "homepage": "https://github.com/erharshbhatia/backend-agent-kit",
       "license": "MIT",
-      "keywords": ["skills", "agents", "multi-agent", "backend", "sdlc"]
+      "keywords": [
+        "skills",
+        "agents",
+        "multi-agent",
+        "backend",
+        "sdlc"
+      ]
     }
   ]
 }

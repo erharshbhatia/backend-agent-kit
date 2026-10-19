@@ -1,6 +1,37 @@
 # backend-agent-kit
 
-A Claude Code plugin for building backend services with many agents working in parallel. It packages the way we work: from a tech doc, to implementation plans, to phased builds tracked in ledgers, with every change documented and every agent held to the same standards. The process is stack-agnostic; a scaffold per stack makes the standards executable.
+Graph engineering for backend builds with Claude Code. A plugin that turns a service build into a graph of contracted tasks that many agents work in parallel, with fresh verifiers and hard anchors on every edge, and a process (tech doc, plan, phases, ledgers, change records, ADRs) that keeps the graph honest for months. Stack-agnostic; a scaffold per stack makes the standards executable.
+
+## The idea in one page
+
+Most agent setups are a chain: do A, then B, then C. One agent, one context, each step waiting on the last, one failure stopping everything, and the agent grading its own work. This kit draws the build as a graph instead and puts things in it that cannot be argued with.
+
+**Nodes are tasks with a contract.** A task is one bounded job. Its input is a prompt built from the phase doc and the ledger: scope, writable files, acceptance criteria, verification commands. Its output is a fixed shape, the worker report (`skills/multi-agent-development/references/worker-report-schema.json`): status, files changed, verification with exit codes and counts, patch paths, what it needs from the coordinator. Free text is one field in it. That is what lets the next node consume the result without a person reading prose.
+
+**Edges are real dependencies only.** Task B waits on task A only when it needs something A produces: a port, a model, a migration, a file. Everything without such an edge runs at the same time. Files two tasks would both write are hidden edges; the kit gives each shared file to one task per wave and makes the other ask for a snippet. Two tasks editing the same function is called out as a planning error, not a merge problem.
+
+**A wave is a diamond.**
+
+```text
+                 ┌─ worker T1 ─▶ anchor ─▶ reviewers ─┐
+ledger, decided ─┼─ worker T2 ─▶ anchor ─▶ reviewers ─┼─▶ reduce in code ─▶ coordinator integrates
+                 └─ worker T3 ─▶ anchor ─▶ reviewers ─┘        (count, verdict,       (patches, shared files,
+                                                                 ledger rows)          check-all, HANDOFF)
+```
+
+- **Fan out:** one worker per task, each in its own copy or worktree with its own database and ports, capped by `max_agents`.
+- **Anchor:** a separate agent re-runs the project's `check` command in the worker's workspace. The worker's "all green" is a claim; the anchor's exit code is the evidence. A green the anchor cannot reproduce is a must-fix on its own.
+- **Verify:** fresh reviewers that never saw the worker's conversation judge the diff against the acceptance criteria. Heavy changes (schema, runtime, interfaces, security) get three reviewers with different lenses and a majority vote, because three different questions catch what one checklist misses.
+- **Reduce in code:** the workflow script counts what came back against what was launched, computes a verdict per task (verified, needs fixes, anchor red, partial, lost) and the ledger rows, and returns one structured result. No wave closes on a partial set; a lost worker is listed with its last checkpoint.
+- **Synthesize:** the coordinator integrates from that result, runs `check-all` on the integrated branch, and rewrites `HANDOFF.md`. Workers' output never passes through the coordinator's context, so the session that runs the fleet stays small.
+
+`workflows/wave.js` is this diamond as code for Claude Code's Workflow tool; `/backend-agent-kit:wave` runs it. Without the Workflow tool the same loop runs through the Agent tool, with the coordinator acting as anchor and fan-in guard.
+
+**Anchors everywhere, not only in the wave.** Invariants change only by an accepted decision record and the owner's agreement. Every change record carries pasted command output, never "tested". A hook blocks the commands that destroy other agents' work (`pkill` by pattern, force pushes, volume deletes, database drops, hard resets). Checks are never silenced to get green. The graph is only as honest as the things in it that refuse to move.
+
+**When not to use the graph.** `multi-agent-development` opens with the test: fewer than three independent tasks, exploratory work, an owner who wants to approve each step, or a real chain of dependencies means one agent and a loop. Inside a single task the lifecycle is a chain on purpose: design before build, build before verify, verify before review. Only review, documentation and the consistency audit run side by side, because they do not need each other.
+
+**Measured, not asserted.** Every wave writes a metrics row into `HANDOFF.md`: launched, returned, lost, verified, anchor-red, must-fix findings, agents, tokens, `check-all` after integration. See Benchmark below.
 
 ## Why this exists
 
@@ -112,13 +143,9 @@ docs/workstreams/HANDOFF.md + STATUS.md + PNN-*.md   resume point, who is doing 
 code + tests + docs/changes/* + docs/decisions/*
 ```
 
-## Graph, not chain
-
-A wave is a diamond: fan out one worker per independent task, reduce in plain code, verify with fresh agents that never saw the worker's chat, synthesize for the coordinator. The pieces that keep it honest are anchors the agents cannot argue with: the `check` command re-run by a separate agent, invariants changeable only by ADR, pasted command output, and the hook that blocks the dangerous commands. `multi-agent-development` opens with the test for when a wave is the wrong tool.
-
 ## Benchmark
 
-There is no benchmark yet, only a baseline. Herald, the first project built with the kit, reached 1,335 unit, 271 database and 22 end-to-end tests in four days, lost six workers at once to a usage limit, and fanned 70 audit findings in by hand. Every wave now writes a metrics row into `HANDOFF.md` (launched, returned, lost, verified, anchor-red, must-fix findings, agents, tokens, `check-all` after integration). Those rows, across projects, are the benchmark. Claims about speed or cost that are not in that table are not claims the kit makes.
+There is no benchmark yet, only a baseline, and the kit will not pretend otherwise. Herald, the first project built with the kit, reached 1,335 unit, 271 database and 22 end-to-end tests in four days, lost six workers at once to a usage limit, and fanned 70 audit findings in by hand. Every wave now writes a metrics row into `HANDOFF.md` (launched, returned, lost, verified, anchor-red, must-fix findings, agents, tokens, `check-all` after integration). Those rows, across projects, are the benchmark. Claims about speed or cost that are not in that table are not claims the kit makes.
 
 ## Updating a project from a newer kit
 

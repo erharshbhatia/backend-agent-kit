@@ -1,8 +1,11 @@
 {
   "name": "backend-agent-kit",
   "version": "0.3.0",
-  "description": "Process-as-skills kit for multi-agent backend development: tech doc, plan, phased build, ledgers, change records, ADRs, and stack scaffolds that enforce the standards.",
-  "author": { "name": "Harsh Bhatia", "url": "https://github.com/erharshbhatia" },
+  "description": "Graph engineering for backend builds with Claude Code: tasks as contracted nodes, fresh verifiers and hard anchors on every edge, waves of parallel agents coordinated as code, and a process (tech doc, plan, ledgers, change records, ADRs) with stack scaffolds that enforce the standards.",
+  "author": {
+    "name": "Harsh Bhatia",
+    "url": "https://github.com/erharshbhatia"
+  },
   "homepage": "https://github.com/erharshbhatia/backend-agent-kit",
   "repository": "https://github.com/erharshbhatia/backend-agent-kit",
   "license": "MIT",
