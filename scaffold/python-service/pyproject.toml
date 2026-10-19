@@ -1,0 +1,95 @@
+# uv workspace root. Rename `app` to your package (see the project-bootstrap skill).
+[project]
+name = "app-workspace"
+version = "0.1.0"
+description = "<Project> (uv workspace root)."
+requires-python = ">=3.12,<3.13"
+dependencies = ["app"]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.100",
+    "import-linter>=2.1",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "testcontainers[postgres]>=4.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["app"]
+
+[tool.uv.sources]
+app = { workspace = true }
+
+# --- ruff -------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["app/src", "."]
+extend-exclude = ["*.md", "docs", "implementation", ".claude"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "N", "SIM", "RUF", "ASYNC", "PT", "TID", "C4", "PIE", "RET"]
+ignore = ["N818"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# Time and ids are injected (Clock, IdGenerator); settings.py is the only environment reader.
+"datetime.datetime.now".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"datetime.datetime.utcnow".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"datetime.datetime.today".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"datetime.date.today".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"time.time".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"time.time_ns".msg = "Inject app.domain.clock.Clock instead of reading the wall clock."
+"uuid.uuid1".msg = "Inject app.domain.ids.IdGenerator (UUIDv7) instead."
+"uuid.uuid4".msg = "Inject app.domain.ids.IdGenerator (UUIDv7) instead."
+"os.environ".msg = "Only app/settings.py reads the environment (pydantic-settings)."
+"os.getenv".msg = "Only app/settings.py reads the environment (pydantic-settings)."
+
+[tool.ruff.lint.per-file-ignores]
+# The only places allowed to read the wall clock: SystemClock and the UUIDv7 generator.
+"app/src/app/domain/clock.py" = ["TID251"]
+"app/src/app/domain/ids.py" = ["TID251"]
+"tests/**" = ["TID251", "E501"]
+"scripts/**" = ["TID251"]
+
+# --- mypy -------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+files = ["app/src", "tests", "scripts"]
+mypy_path = ["app/src", "scripts", "."]
+explicit_package_bases = true
+# Alembic's script directory is not a package.
+exclude = ["app/src/app/persistence/migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# --- pytest -----------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["--strict-markers", "--strict-config", "-ra"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "db: needs Docker (Postgres testcontainer). Run with `make test-db`.",
+    "external: reaches a real external service (e.g. an LLM API); needs its key. Policy in an ADR.",
+]
+filterwarnings = ["error"]

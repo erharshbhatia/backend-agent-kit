@@ -1,0 +1,24 @@
+# Configuration for scripts/check_domain_words.py, check_sql_location.py and check_repositories.py.
+# Fill in per project (project-bootstrap skill). Keep the allowlist small; every entry needs a reason.
+
+[domain_words]
+# Generic code that must not mention tenant, customer, or workflow-specific words.
+guarded_dirs = ["app/src/app"]
+# Whole identifier parts: `invoice`, `Invoice`, `invoice_id`, `invoiceTotal` all match.
+# Add inflections explicitly (invoice, invoices, invoicing).
+forbidden_words = []
+# Exceptions: { path = "<glob relative to repo root>", word = "<word>", reason = "<why>" }
+allow = []
+
+[sql_location]
+guarded_dirs = ["app/src/app"]
+allowed_prefixes = [
+    "app/src/app/persistence/postgres/",
+    "app/src/app/persistence/migrations/",
+]
+
+[repositories]
+ports_dir = "app/src/app/persistence/ports"
+postgres_dir = "app/src/app/persistence/postgres/repositories"
+memory_dir = "app/src/app/persistence/memory/repositories"
+contracts_dir = "tests/persistence/contracts"

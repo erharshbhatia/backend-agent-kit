@@ -1,0 +1,73 @@
+# Architecture contracts (engineering-standards lld.md). The source of truth when prose and
+# config disagree. Run: `make imports`. Add a contract per vendor SDK you put behind a port
+# (`protected_if_present`, or `vendor_subpackage` for one part of a namespace package).
+
+[importlinter]
+root_packages =
+    app
+include_external_packages = True
+contract_types =
+    protected_if_present: scripts.importlinter_contracts.PresentOnlyProtectedContract
+    vendor_subpackage: scripts.importlinter_contracts.VendorSubpackageContract
+    forbidden_if_present: scripts.importlinter_contracts.PresentOnlyForbiddenContract
+
+[importlinter:contract:layers]
+name = Layers point inward (entrypoints -> application -> domain; only bootstrap wires)
+type = layers
+layers =
+    app.bootstrap
+    app.entrypoints
+    app.application
+    app.domain
+exhaustive = False
+
+[importlinter:contract:domain-pure]
+name = Domain is pure: no I/O, vendors, adapters, settings, or logging
+type = forbidden_if_present
+source_modules =
+    app.domain
+forbidden_modules =
+    app.persistence
+    app.observability
+    app.settings
+    sqlalchemy
+    psycopg
+    alembic
+    pydantic_settings
+    structlog
+    fastapi
+    httpx
+
+[importlinter:contract:persistence-ports]
+name = Persistence ports import only the domain
+type = forbidden_if_present
+source_modules =
+    app.persistence.ports
+forbidden_modules =
+    app.persistence.postgres
+    app.persistence.memory
+    app.observability
+    app.settings
+    sqlalchemy
+    psycopg
+    fastapi
+    httpx
+
+[importlinter:contract:sql-only-in-postgres]
+name = Only app.persistence.postgres imports sqlalchemy / psycopg / alembic (migrations/ is an Alembic script dir, not a package)
+type = protected_if_present
+protected_modules =
+    sqlalchemy
+    psycopg
+    alembic
+allowed_importers =
+    app.persistence.postgres
+
+[importlinter:contract:implementations-only-in-bootstrap]
+name = Only app.bootstrap picks persistence implementations
+type = protected_if_present
+protected_modules =
+    app.persistence.postgres
+    app.persistence.memory
+allowed_importers =
+    app.bootstrap
