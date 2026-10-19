@@ -20,11 +20,12 @@ Out: <bullets — including things a neighbouring task owns>
 - <path/or/glob/**>
 - docs/changes/YYYY/YYYY-MM-DD-<area>-<slug>.md (your change record)
 - <ADR-NNNN file reserved for you, if any>
-Do NOT edit: <shared hot files: bootstrap.py, settings.py, pyproject.toml, lock file, INDEX files, STATUS.md>.
-If you need a change there, put the exact snippet in your report under "Needs from coordinator".
+Do NOT edit the shared hot files (`workstream-tracking`, "Shared hot files"), in particular: <the ones this task could be tempted by: bootstrap.py, settings.py, pyproject.toml, uv.lock, INDEX files, STATUS.md, HANDOFF.md>.
+If you need a change there, put the exact snippet in your report under "Needs from coordinator" (copy mode: also as a separate `<task>-shared.patch`).
 
 ## Resources
-- Worktree: <path> (branch <branch>). Work only here.
+- Isolation: worktree <path> (branch <branch>) — or — copy <path> (baseline commit `baseline`; hand back `git diff --binary` patches). Work only there.
+- Checkpoint: after every green step, commit on your branch (worktree) or write `git -C <copy> diff --binary > <scratch>/<task>-checkpoint.patch` (copy). Report the path.
 - Database: testcontainers / your own throwaway Postgres on port <port>. Never the dev database (<host:port>) or compose volumes.
 - Ports for any server you start: <port range>.
 
@@ -48,6 +49,7 @@ If you need a change there, put the exact snippet in your report under "Needs fr
 - Files changed (with line counts)
 - Verification: commands + pass/fail counts
 - Change record path; ledger row text you want; INDEX row text you want
+- Patch paths (copy mode): main, shared, last checkpoint
 - Needs from coordinator (snippets for shared files), decisions needed, follow-ups
 - Judgment calls and deviations
 ```

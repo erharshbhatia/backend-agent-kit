@@ -38,19 +38,28 @@ Use this together with `sdlc-workflow` (every worker still follows the lifecycle
 - **Wave 0 (often the coordinator alone):** the shared seams. Ports, domain models, settings fields, migrations, the phase doc, ADRs. Everything later waves import.
 - **Wave 1..n:** independent tasks over those seams: one adapter, one endpoint group, one UI area, one connector.
 - **Last wave:** wiring in the composition root, docs sync, end-to-end tests.
-- **Shared hot files** belong to one task per wave: the composition root (`bootstrap.py`), `settings.py`, `pyproject.toml`, the lock file, shared API schema files, migration heads, the UI router. If two tasks need one, either sequence them, or give the file to one task and have the other report "needs in bootstrap: …" for the coordinator to add during integration.
+- **Shared hot files** belong to one task per wave. The canonical list is in `workstream-tracking`, "Shared hot files"; don't copy it here. If two tasks need one, either sequence them, or give the file to one task and have the other report "needs in `bootstrap.py`: …" for the coordinator to add during integration.
 - **Index files** (`docs/changes/INDEX.md`, `docs/decisions/INDEX.md`, `STATUS.md`, `OPEN-DECISIONS.md`, `ADHOC.md`) are edited by the coordinator at integration time, with small anchored edits. Workers put the row they want in their report.
 - **ADR numbers:** reserve them before launch (coordinator creates the `Proposed` stubs and bumps "Next number"), then hand each worker its number. Two workers never pick numbers themselves.
 - **Migration numbers:** same rule. Hand out revision ids or sequence migrations across waves.
-- Keep waves to what you can integrate: 3–6 workers is a good wave. More workers mostly means more merge work.
+- **Size waves for limits, not only for merges.** 3–6 workers is a good wave when nothing else constrains it. Usage, session and rate limits kill every running worker at the same moment, so a wave is also the amount of work you can afford to lose at once: keep it to 3–4 when a limit is near, make workers checkpoint (see "Isolation"), and integrate finished workers as they report instead of waiting for the whole wave.
 
 ## Isolation
 
-- **One task = one worktree + one branch.** Launch with `isolation: "worktree"` or create it yourself (`git worktree add .claude/worktrees/<task> -b <task-branch>`). `.claude/worktrees/` is in `.gitignore`.
-- **Throwaway resources per agent.** Each worker that needs a database uses a testcontainer or its own throwaway Postgres on its own port. Each worker that runs servers uses its own ports (hand them out: worker 1 → 18110/18111, worker 2 → 18120/18121 …). Write them into the prompt.
+Two modes. The project's isolation ADR (`project-bootstrap`, ADR-0006) says which applies; until it exists, a repository with no commits is in copy mode.
+
+| Mode | When | How |
+| --- | --- | --- |
+| **Worktree** | The repository has commits and the owner allows commits on task branches | One task = one worktree + one branch: launch with `isolation: "worktree"` or `git worktree add .claude/worktrees/<task> -b <task-branch>` (`.claude/worktrees/` is git-ignored). Workers commit on their branch, never on the target; the coordinator integrates |
+| **Copy** | The repository has no commits yet, or the owner forbids commits (the kit's default `CLAUDE.md` rule) | One task = one throwaway copy: `rsync -a --exclude .git --exclude .venv <repo>/ <scratch>/<task>/`, then inside the copy `git init -q && git add -A && git commit -qm baseline` so the worker has a diff base, then `uv sync` there. The worker hands back patches (`git -C <copy> diff --binary > <scratch>/<task>.patch`); the coordinator applies them to the repository with `git apply --3way`, or `patch -p1` when the repository has no commits |
+
+`git worktree` needs at least one commit, so a fresh project cannot use it; copy mode costs a `uv sync` and some disk per copy, worktree mode costs a decision about commits. In both modes:
+
+- **Throwaway resources per agent.** Each worker that needs a database uses a testcontainer or its own throwaway Postgres on its own port. Each worker that runs servers uses its own ports (hand them out: worker 1 → 18110/18111, worker 2 → 18120/18121 …). Write them into the prompt. Several projects on one machine each need their own compose host ports too (`PG_HOST_PORT` and `API_HOST_PORT` under the project's env prefix; the local-environment ADR names them).
 - **Never touch the developer database, the shared compose volume, or a server the owner is using.** Name them in every prompt as off-limits.
 - **No shared mutable state between workers** except git, and git only through the coordinator.
-- Workers do not commit to the target branch. They commit on their own branch (if allowed) or leave the change uncommitted in their worktree; the coordinator integrates.
+- **Checkpoint early.** Workers commit on their branch (worktree) or write a patch (copy) after every green step, not only at the end, and report the path. A worker killed mid-task then leaves work the coordinator can resume (see "When agents stop").
+- Workers never commit to the target branch; the coordinator integrates.
 
 ## Integrating
 
@@ -60,6 +69,8 @@ Pick the lightest method that works:
 | --- | --- |
 | Branch is behind but doesn't conflict | `git rebase <target>` in the worker's worktree, run checks, fast-forward the target |
 | Worker left uncommitted changes | `git -C <worktree> diff --binary > <scratch>/<task>.patch`, then `git apply --3way <scratch>/<task>.patch` on the target |
+| Worker in copy mode | Same patch flow from the copy's baseline commit. Ask for two patches when shared hot files were touched: `<task>-main.patch` (its own files) and `<task>-shared.patch` (shared files), so the shared one is reviewed line by line and applied by hand. A repository with no commits takes `patch -p1 < <patch>` |
+| Lock file changed (`uv.lock`) | Never merge it by hand. Apply the code and `pyproject.toml` changes, run `uv lock && uv sync` on the target, and check the lock diff is only the expected packages |
 | Conflicts in prose or index files only | Resolve by hand: keep both sides' rows, newest first |
 | Conflicts in code across several files | Launch an integrator subagent in a fresh worktree with both branches named, the intended behaviour of each, and the checks to run |
 | Two workers changed the same function | Stop. That was a planning error. Integrate one, then send the other worker back to rebase and redo its part |
@@ -74,7 +85,8 @@ Every worker starts with no memory of the conversation (unless it is a fork). It
 - the governing docs to read first (`project-guide`, the phase doc section, ADRs);
 - scope in and out;
 - the exact files and globs it may write; everything else is read-only;
-- resources: its worktree, its ports, its database approach; what is off-limits;
+- resources: its worktree or copy, its ports, its database approach; what is off-limits;
+- the isolation mode, how to hand work back (branch or patch), and the checkpoint rule;
 - acceptance criteria;
 - verification commands to run and paste;
 - what to put in the report (format, max length);
@@ -85,12 +97,12 @@ Template: `references/subagent-prompt-template.md`.
 ## Review and audit subagents
 
 - **Independent review:** a fresh read-only subagent, given the task's change record and diff (or file list), runs `engineering-standards/references/review-checklist.md` and reports findings as `file:line → issue → proposed fix`, ranked. Fix must-fix items before integration closes.
-- **Consistency audit recipe:** use a general-purpose read-only subagent (not a pure search agent). Prompt: "Read-only. For terms/sections <list>, cross-check `tech-doc.md`, `implementation/*`, `.claude/skills/**`, `docs/decisions/INDEX.md`, `docs/workstreams/*`, and the code under <paths>. Report contradictions, stale values, dead paths and links as file:line → proposed text. Ignore `docs/changes/*` and superseded ADRs." Split big sweeps across several auditors by doc group.
+- **Consistency audit:** the recipe (prompt, scope, what to ignore) is in `sdlc-workflow`, "Use subagents"; run it as written there after any wave that touched three or more docs, split across several auditors by doc group.
 - **Code mapping:** to answer "how does X work" across many files, delegate to one read-only agent and keep only its conclusions.
 
 ## When agents stop
 
-- **Rate limits or network outages** kill workers mid-task. Their worktree keeps the work. Resume the same agent with `SendMessage` ("continue from where you stopped; re-run your checks"), don't start a new one on the same files.
+- **Rate limits, usage limits or network outages** kill workers mid-task, usually all of them at once. Their worktree or copy keeps the work, plus any checkpoint patch. Look at what is there first (`git -C <copy> diff --stat`, the checkpoint patches), then resume the same agent with `SendMessage` ("continue from where you stopped; re-run your checks"), don't start a new one on the same files.
 - **A worker reports it was blocked by a permission denial:** accept it. Don't perform the denied action yourself on its behalf, and don't tell it to find another way around. Surface it to the owner.
 - **A worker drifted out of scope:** keep what's in scope, revert the rest in its worktree, record the drift.
 - **Two agents claim one task:** the later one stops and releases its claim.
@@ -125,7 +137,7 @@ When asked "is it done?", answer from the ledger and the actual check output, no
 
 ## Handoff
 
-At session end, even mid-wave: every ledger row is current (in progress / blocked / done), each in-flight worker's worktree path and state is in the session log, and the exact next step is written. The next coordinator must be able to continue from the ledger alone.
+At session end, even mid-wave: rewrite `docs/workstreams/HANDOFF.md` (`workstream-tracking`, template in its `assets/`) with where the build is and its verified numbers, each in-flight worker's worktree or copy path and patch state, what needs the owner, and the exact next action; keep every ledger row current (in progress / blocked / done). The next coordinator must be able to continue from `HANDOFF.md` and the ledgers alone.
 
 ## Optional: UI recording runs
 

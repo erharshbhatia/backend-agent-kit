@@ -27,15 +27,15 @@ Ask in **one batch**, each question with the doc's recommended default. When you
 
 ## Use subagents
 
-- **Parallel work:** independent tasks can run in parallel subagents. Each claims its own task in the ledger first, works only in the files its task owns, and writes its own change record; the coordinating agent merges ledger and index updates at the end. The mechanics (worktrees, ports, databases, merging) are in `multi-agent-development`.
+- **Parallel work:** independent tasks can run in parallel subagents. Each claims its own task in the ledger first, works only in the files its task owns, and writes its own change record; the coordinating agent merges ledger and index updates at the end. The mechanics (worktrees or throwaway copies, ports, databases, merging) are in `multi-agent-development`.
 - **Consistency audit:** after any change that touches three or more docs, or before closing a phase, spawn a read-only reviewer subagent to cross-check the HLD, `implementation/`, `docs/`, and the skills for contradictions, stale references, and broken links; fix what it finds before Stage 8.
 - **Independent review:** for change types that need review (Stage 6), a fresh subagent running the review checklist is a valid reviewer.
 - Give each subagent the exact files it may write; everything else is read-only for it.
-- **Audit recipe:** use a general-purpose or planning subagent (not a search-only one, which only locates). Prompt: "Read-only. For terms/sections <list>, cross-check `tech-doc.md`, `docs/site/hld.html`, `implementation/*`, `.claude/skills/**`, `docs/decisions/INDEX.md`, `docs/workstreams/*`. Report contradictions, stale values, dead paths and links as file:line → proposed text. Ignore `docs/changes/*`, archived docs, and superseded ADRs." Split large sweeps across several subagents by doc group.
+- **Audit recipe** (the only copy; `multi-agent-development` links here): use a general-purpose or planning subagent (not a search-only one, which only locates). Prompt: "Read-only. For terms/sections <list>, cross-check `tech-doc.md`, `docs/site/hld.html` (if the project publishes one), `implementation/*`, `.claude/skills/**`, `docs/decisions/INDEX.md`, `docs/workstreams/*`, and the code under <paths>. Report contradictions, stale values, dead paths and links as file:line → proposed text. Ignore `docs/changes/*`, archived docs, and superseded ADRs." Split large sweeps across several subagents by doc group.
 
 ## Stage 0: Orient
 - Use the `project-guide` skill; skim `INVARIANTS.md`.
-- Read `docs/workstreams/STATUS.md` and the ledger for your work (`workstream-tracking`).
+- Read `docs/workstreams/HANDOFF.md` (the resume point), then `STATUS.md` and the ledger for your work (`workstream-tracking`).
 - Read the current outcome doc (`implementation/outcome-NN-<slug>.md`). Work toward it: build only the slice of the phase it names, in its milestone order; anything it defers is out of scope unless the owner says otherwise.
 - **Gate:** you can name the task ID (or change type), the outcome it serves and its slice, the governing docs, and any task already in progress by another agent.
 
@@ -85,7 +85,7 @@ Ask in **one batch**, each question with the doc's recommended default. When you
 
 ## Stage 8: Close
 - Update the ledger: task status `done` with the change record link, session log entry, blockers, and the next step for whoever continues (`workstream-tracking`).
-- Update `docs/workstreams/STATUS.md` if the phase status changed.
+- Update `docs/workstreams/STATUS.md` if the phase status changed; rewrite `HANDOFF.md` if you are the coordinator or the only session.
 - Commit with the message format in `change-records`, only if the owner asked you to commit.
 - **Gate:** the next agent could continue from the ledger alone.
 
@@ -99,4 +99,11 @@ Ask in **one batch**, each question with the doc's recommended default. When you
 
 ## Scaling down
 
-A one-line bug fix still gets: orient (quick), a reproduced failing test, the fix, `make check`, a short change record, and a ledger line. What scales down is length, not presence.
+Length scales down, not presence. For `bugfix`, `config`, `dependency`, `refactor` and `docs-only` changes:
+
+- Orient = `INVARIANTS.md`, `HANDOFF.md` and the ledger row you claim; the outcome doc only when the change touches scope.
+- Design note = the "What and why" paragraph of the short change record (cause, fix, reproducing test).
+- Change record = `change-records/assets/change-record-short-template.md`, about 20 lines.
+- Verification is still real output pasted in; a bug still gets its reproducing test before the fix.
+
+So a one-line bug fix gets: a quick orient, a reproduced failing test, the fix, `make check`, a short change record, and a ledger line. The full orient and the full template are for `phase-task`, `feature`, `integration`, `schema`, `runtime`, `interface`, `model` and `security-sensitive`.

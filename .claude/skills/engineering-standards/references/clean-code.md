@@ -37,7 +37,7 @@
 ## 4. Errors
 
 - Integration edges return values: a typed result (success | failure with category), typed model failures, `Created | Existing`.
-- Raise for programmer errors and infrastructure faults; use the project's exception hierarchy (`<package>.domain.errors`), never bare `Exception`.
+- Raise for programmer errors and infrastructure faults; use the project's exception hierarchy (`domain/errors.py`; persistence failures in `persistence/ports/errors.py`), never bare `Exception`.
 - Never swallow: no `except Exception: pass`, no returning `None` to mean "failed".
 - Error messages say what happened and what to do; include IDs, never secrets or PII.
 
@@ -59,7 +59,7 @@
 
 ## 7. Logging and tracing
 
-- structlog via `<package>.observability.logging.get_logger(__name__)`; console renderer locally, JSON in deployed environments (`<PREFIX>_LOGGING__FORMAT=json`).
+- structlog via `get_logger(__name__)` from `observability/logging.py`; console renderer locally, JSON in deployed environments (the `LOGGING__FORMAT=json` setting under the project's env prefix).
 - Bind correlation IDs (request, aggregate, job, external call) with a context helper so every event carries them.
 - Module loggers are `log = get_logger(__name__)` at import and stay lazy; don't build a bound logger at module level (it freezes configuration). Bind extra context inside functions.
 - Log events, not prose: `log.info("order.placed", order_id=..., total=...)`.
@@ -68,7 +68,7 @@
 
 ## 8. Configuration and secrets
 
-- All settings in `<package>/settings.py` (pydantic-settings, `<PREFIX>_` prefix, nested with `__`); passed via the container.
+- All settings in `settings.py` at the package root (pydantic-settings, the project's env prefix, nested with `__`); passed via the container.
 - Secrets only from environment or a secret store; never committed (`.env` is in `.gitignore`), never in fixtures, logs, or audit payloads.
 - Tunable business values belong in data or configuration owned by the business, not core settings.
 

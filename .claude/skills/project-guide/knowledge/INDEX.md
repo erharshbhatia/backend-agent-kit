@@ -24,6 +24,7 @@
 | `docs/workstreams/PNN-*.md` | Per-phase ledger: tasks, decisions, blockers, session log | `workstream-tracking` |
 | `docs/workstreams/OPEN-DECISIONS.md` | Every "Decision to review" across phases | `workstream-tracking` |
 | `docs/workstreams/ADHOC.md` | Work outside a single active phase | `workstream-tracking` |
+| `docs/workstreams/HANDOFF.md` | Resume point: read first in a new session | `workstream-tracking` |
 | `docs/changes/INDEX.md` + `docs/changes/YYYY/*.md` | One change record per change | `change-records` |
 | `docs/decisions/INDEX.md` + `docs/decisions/ADR-*.md` | Architecture decision records | `change-records` |
 
@@ -52,14 +53,17 @@
   entrypoints/      api (FastAPI), worker, cli — thin
   application/      use cases
   domain/           pure models and rules
-  ports/            Protocols (or <module>/port.py next to the consumer)
-  adapters/         one module per technology
-  persistence/      ports/, postgres/, memory/, migrations/
+  persistence/      ports/ (Protocols, errors, results), postgres/, memory/, migrations/
+  observability/    logging (and tracing)
+  <module>/         one package per capability that talks to the outside: port.py (Protocol)
+                    + one adapter module per technology, e.g. models/, integrations/<partner>/
   bootstrap.py      composition root
   settings.py       pydantic-settings, env prefix <PREFIX>_
-tests/              mirrors the package; persistence/contracts/ for repository suites
+tests/              mirrors the package; scenarios/ for end-to-end; persistence/contracts/ for repository suites
 docs/               workstreams, changes, decisions (tracked in git)
 implementation/     plans and binding specs
 ```
 
-Commands: `make up` (local Postgres), `make migrate`, `make check` (lint, format, types, import contracts, guards, tests not marked `db`/`external`; no Docker), `make test-db` (Postgres tests), `make migrations-check` (`alembic check`), `make check-all` (all three), `make stack` (whole system in containers), <other commands>.
+Commands: `make up` (local Postgres), `make migrate`, `make check` (lint, format, types, import contracts, guards, tests not marked `db`/`external`; no Docker), `make test-db` (Postgres tests), `make migrations-check` (`alembic check`), `make check-all` (all three), `make e2e` (scenarios in `tests/scenarios/`), `make test-external` (tests marked `external`; needs keys), `make stack` (whole system in containers), <other commands>.
+
+Kit version this project's generic skills match: <kit commit or CHANGELOG entry> (`project-bootstrap`, "Generic files stay generic").

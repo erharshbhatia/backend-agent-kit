@@ -1,5 +1,7 @@
 # Low-level design
 
+This file is generic and stays that way: paths are relative to the package root, and the package name, env prefix, vendors and domain words are recorded in `project-guide/knowledge/` and `CLAUDE.md`, never here. That is what lets a project pull kit updates later (`project-bootstrap`, "Generic files stay generic").
+
 ## Contents
 1. Layers and dependency rule
 2. Ports and adapters
@@ -31,14 +33,14 @@ adapters                           postgres repositories, HTTP integrations, mod
 
 ## 2. Ports and adapters
 
-- A **port** is a `typing.Protocol` in the consuming package (`<package>/<module>/port.py` or `<package>/persistence/ports/`). It speaks domain types only.
+- A **port** is a `typing.Protocol` in the consuming package: `<module>/port.py` next to its consumer, or `persistence/ports/` for repositories and the unit of work. It speaks domain types only.
 - An **adapter** implements one port for one technology, in its own module. Vendor SDK types never leave the adapter: translate at the edge.
 - Every port that crosses a process boundary has at least two implementations over time: the real adapter and a fake or memory twin for tests. Model/LLM ports follow the project's test-policy ADR (some projects forbid fakes and test against the real model; others record fixtures). State the policy once and apply it everywhere.
-- Vendor isolation (enforced): each vendor package is importable only from its adapter module; list the pairs in the import-linter config, e.g. `sqlalchemy`/`psycopg` only in `persistence/postgres/`, the `<vendor>` SDK only in `models/<vendor>_client.py`.
+- Vendor isolation (enforced): each vendor package is importable only from its adapter module; list the pairs in the import-linter config, e.g. `sqlalchemy`/`psycopg` only in `persistence/postgres/`, an LLM vendor's SDK only in its adapter module under `models/`.
 
 ## 3. Composition root
 
-- `<package>/bootstrap.py` builds a frozen `Container` from `Settings` (pydantic-settings). It is the only module that imports concrete adapters.
+- `bootstrap.py` (at the package root) builds a frozen `Container` from `Settings` (pydantic-settings). It is the only module that imports concrete adapters.
 - No module-level singletons, no global clients, no `os.environ` reads outside `settings.py`.
 - Tests build their own container with fakes and memory repositories; entrypoints call `build_container()` once.
 
@@ -52,14 +54,14 @@ adapters                           postgres repositories, HTTP integrations, mod
 
 | You are writing… | It goes in | Talks through |
 | --- | --- | --- |
-| A pure business rule, policy, or validation | `<package>/domain/` | — |
-| A use case (one user or system action) | `<package>/application/` | ports |
-| Anything reading/writing Postgres | `<package>/persistence/postgres/repositories/` | its repository port |
+| A pure business rule, policy, or validation | `domain/` | — |
+| A use case (one user or system action) | `application/` | ports |
+| Anything reading/writing Postgres | `persistence/postgres/repositories/` | its repository port |
 | A call to an outside system | an integration package (`integrations/<partner>/`) as a registered operation | the integration gateway port |
 | Tenant- or customer-specific behaviour | a tenant/integration package or configuration, never the core | registries, config |
-| A model call | `<package>/models/` adapter | `ModelClient` port |
-| HTTP endpoint / CLI command / worker loop | `<package>/entrypoints/` (thin) | a use case |
-| Settings | `<package>/settings.py` | the container |
+| A model call | `models/` adapter | `ModelClient` port |
+| HTTP endpoint / CLI command / worker loop | `entrypoints/` (thin) | a use case |
+| Settings | `settings.py` | the container |
 
 ## 6. Designing a new interface
 

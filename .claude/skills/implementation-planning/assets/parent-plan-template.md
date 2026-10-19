@@ -73,9 +73,9 @@ See `engineering-standards`. Project-specific additions:
   entrypoints/      api, worker, cli (thin)
   application/      use cases
   domain/           pure models and rules
-  <module>/port.py  ports (Protocols) next to their consumers
-  adapters/         one module per technology
-  persistence/      ports/, postgres/, memory/, migrations/
+  persistence/      ports/ (Protocols, errors, results), postgres/, memory/, migrations/
+  observability/    logging (and tracing)
+  <module>/         one package per outside-facing capability: port.py + one adapter per technology
   bootstrap.py      composition root (only place that picks implementations)
   settings.py       pydantic-settings, <PREFIX>_ env prefix
 mocks/              local stand-ins for external systems

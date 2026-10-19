@@ -17,5 +17,6 @@
 
 ## Other work
 
+- Resume point for a new session: [HANDOFF.md](HANDOFF.md)
 - Ad hoc work (bugfixes, cross-phase changes): [ADHOC.md](ADHOC.md)
 - Open decisions: [OPEN-DECISIONS.md](OPEN-DECISIONS.md)

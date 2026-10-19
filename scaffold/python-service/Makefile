@@ -4,7 +4,7 @@ UV ?= uv
 RUN := $(UV) run
 
 .DEFAULT_GOAL := help
-.PHONY: help sync up down stack stack-logs migrate test test-db lint fmt typecheck imports guards migrations-check check check-all
+.PHONY: help sync up down stack stack-logs migrate test test-db test-external e2e lint fmt typecheck imports guards migrations-check check check-all
 
 help: ## List targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -32,6 +32,12 @@ test: ## Unit and application tests (no Docker)
 
 test-db: ## Repository contract and other Postgres tests (testcontainers; needs Docker)
 	$(RUN) pytest -m db
+
+test-external: ## Tests marked external (real outside services; needs keys; policy in an ADR). Exit 5 = none exist yet
+	$(RUN) pytest -m external || [ $$? -eq 5 ]
+
+e2e: ## End-to-end scenarios in tests/scenarios (those marked db need Docker)
+	$(RUN) pytest tests/scenarios -m "not external"
 
 lint: ## Ruff lint + format check
 	$(RUN) ruff check .

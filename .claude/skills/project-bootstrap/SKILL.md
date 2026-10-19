@@ -16,11 +16,11 @@ The kit gives a new project our whole way of working on day one: the lifecycle, 
 | 3 | Write the tech doc (HLD) | `tech-doc.md` (+ optional `docs/site/hld.html`) | `tech-doc-writing` |
 | 4 | Plan the build | `implementation/00-implementation-plan.md`, `outcome-01-<slug>.md`, `pNN-<slug>.md`, `implementation/README.md` | `implementation-planning` |
 | 5 | Record the first decisions | ADR-0001… (below) | `change-records` |
-| 6 | Create the ledgers | `docs/workstreams/STATUS.md`, `OPEN-DECISIONS.md`, `ADHOC.md`, `P00-foundations.md` | `workstream-tracking` |
+| 6 | Create the ledgers | `docs/workstreams/STATUS.md`, `HANDOFF.md`, `OPEN-DECISIONS.md`, `ADHOC.md`, `P00-foundations.md` | `workstream-tracking` |
 | 7 | Build P00 foundations | The service skeleton, green `make check` | `sdlc-workflow`, `engineering-standards` |
 | 8 | Start phase work | Waves of tasks | `multi-agent-development` |
 
-Ask the owner for decisions in **one** batch at step 2–3 (product goals, non-goals, stack deviations, LLM test policy, docs in git). Everything else you do without asking.
+Ask the owner for decisions in **one** batch at step 2–3 (product goals, non-goals, stack deviations, LLM test policy, docs in git, commits on task branches or not). Everything else you do without asking.
 
 ## 1. Copy and fill placeholders
 
@@ -36,12 +36,24 @@ Find every placeholder: `grep -rnE '<(Project|package|PREFIX|domain-words|outcom
 | Placeholder | Meaning | Where it appears |
 | --- | --- | --- |
 | `<Project>` | Human name of the project | `CLAUDE.md`, `project-guide/SKILL.md`, tech doc and plan templates, scaffold `pyproject.toml` descriptions and docstrings |
-| `<package>` | Python package name (snake_case) | `CLAUDE.md`, `engineering-standards` references, `project-guide/knowledge/*`, plan templates (the scaffold itself uses `app`; see renames below) |
-| `<PREFIX>` | Environment variable prefix (e.g. `ORD`) | `engineering-standards/references/clean-code.md`, `project-guide/knowledge/INDEX.md`, parent-plan template (the scaffold uses `APP_`) |
-| `<domain-words>` | Words generic code must never contain (tenant, customer, workflow names) | `CLAUDE.md`, `engineering-standards` rule 9, `project-guide/knowledge/INVARIANTS.md`; also fill `scripts/guards.toml` `forbidden_words` |
+| `<package>` | Python package name (snake_case) | `CLAUDE.md`, `project-guide/knowledge/*`, plan templates (the scaffold itself uses `app`; see renames below) |
+| `<PREFIX>` | Environment variable prefix (e.g. `ORD`) | `project-guide/knowledge/INDEX.md`, parent-plan template (the scaffold uses `APP_`) |
+| `<domain-words>` | Words generic code must never contain (tenant, customer, workflow names) | `CLAUDE.md`, `project-guide/knowledge/INVARIANTS.md`; also fill `scripts/guards.toml` `forbidden_words` |
 | `<outcome>` | An outcome name, used in ledger rows as `not started (deferred: <outcome>)` | `sdlc-workflow`, `workstream-tracking`, `implementation-planning` (filled per row, not at bootstrap) |
 | `<retired terms>` | Words the team agreed not to use as system terms | `CLAUDE.md` "Never"; list them in `GLOSSARY.md` "Retired terms" |
-| `<vendor>` | External SDKs that must live behind a port (LLM, payments, queues) | `engineering-standards/references/lld.md`; add one `.importlinter` contract per vendor |
+| (vendors) | External SDKs that must live behind a port (LLM, payments, queues) have no placeholder: add one `.importlinter` contract per vendor and name them in `ARCHITECTURE.md` |
+
+### Generic files stay generic
+
+`engineering-standards/**`, `sdlc-workflow/**`, `change-records/**`, `workstream-tracking/**`, `multi-agent-development/**`, `implementation-planning/**` and `tech-doc-writing/**` contain no placeholders and nothing project-specific, and must stay that way: project names, prefixes, vendors, domain words and paths go in `project-guide/knowledge/`, `CLAUDE.md`, the ADRs and the design docs. Only `project-guide/` and `CLAUDE.md` are edited per project. That is what lets a project pull kit improvements later:
+
+```bash
+for s in engineering-standards sdlc-workflow change-records workstream-tracking multi-agent-development implementation-planning tech-doc-writing; do
+  diff -rq <kit>/.claude/skills/$s .claude/skills/$s
+done
+```
+
+Copy over what changed, read the kit's `CHANGELOG.md` for entries that need a project-side follow-up (a new template, a new Makefile target, a new ledger file), record it as a `docs-only` change, and note the kit version in `project-guide/knowledge/INDEX.md`.
 
 Scaffold renames (when P00 copies it in):
 
@@ -74,11 +86,12 @@ Follow `tech-doc-writing`, then `implementation-planning`. The plan must name P0
 | ADR-0002 | Stack: language, framework, database, migration tool, test tools | Default: the scaffold's stack. Record deviations |
 | ADR-0003 | Testing policy for external services (LLMs, payment APIs) | Options: real calls in tests marked `external` (fail, not skip, without a key); recorded fixtures; fakes. State which and why |
 | ADR-0004 | Docs in git | Default: `docs/` tracked. If the owner keeps docs local, record it and update `.gitignore` |
-| ADR-0005 | Local environment: compose stack, ports, dev database rules | Name the dev database agents must never touch |
+| ADR-0005 | Local environment: compose stack, ports, dev database rules | Name the dev database agents must never touch, and the host ports (`<PREFIX>_PG_HOST_PORT`, `<PREFIX>_API_HOST_PORT`) when several projects share one machine |
+| ADR-0006 | Isolation mode for parallel agents | Worktree mode (the owner allows commits on task branches; "never commit" then applies to the target branch only) or copy mode (no commits: throwaway copies and patches). `git worktree` needs a commit to exist, so a fresh repository is in copy mode until the owner decides. See `multi-agent-development`, "Isolation" |
 
 ## 6. Ledgers
 
-Create from `workstream-tracking/assets/`. `STATUS.md` names the current outcome and lists every phase. `P00-foundations.md` gets the checklist below as its task list.
+Create from `workstream-tracking/assets/`. `STATUS.md` names the current outcome and lists every phase; `HANDOFF.md` names the isolation mode and the off-limits resources from ADR-0005/0006. `P00-foundations.md` gets the checklist below as its task list.
 
 ## 7. P00 foundations checklist
 

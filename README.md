@@ -11,7 +11,8 @@ Nothing in here is specific to one product. You copy the kit, fill in the placeh
 | `CLAUDE.md` | Rules every agent follows in the new project (fill in the `<...>` placeholders) |
 | `.claude/skills/` | The process, as skills Claude Code loads automatically |
 | `scaffold/python-service/` | A small, runnable Python service skeleton with the tooling the standards expect |
-| `docs/` | Empty ledgers and indexes: workstreams, change records, decisions |
+| `docs/` | Empty ledgers and indexes: workstreams (including `HANDOFF.md`, the resume point), change records, decisions |
+| `CHANGELOG.md` | What changed in the kit, so projects bootstrapped earlier can pull improvements |
 | `implementation/` | Where the parent plan, outcome docs and phase docs go |
 
 ### Skills
@@ -63,3 +64,7 @@ code + tests + docs/changes/* + docs/decisions/*
 The default stack is Python 3.12, uv, FastAPI, SQLAlchemy async with psycopg 3, Alembic, Pydantic v2, structlog, pytest with Hypothesis and testcontainers, ruff, mypy `--strict` and import-linter. `make check` runs every gate that needs no Docker; `make check-all` adds the Postgres tests and `alembic check`. Record a different choice as an ADR in the new project; the process skills don't depend on the stack.
 
 `docs/` is tracked in git by default. If a project keeps docs elsewhere, record that as an ADR and update `change-records` and `workstream-tracking`.
+
+## Updating a project from a newer kit
+
+The seven process skills (`engineering-standards`, `sdlc-workflow`, `change-records`, `workstream-tracking`, `multi-agent-development`, `implementation-planning`, `tech-doc-writing`) contain nothing project-specific, so a project can copy newer versions straight over its own. `project-bootstrap` ("Generic files stay generic") has the recipe; `CHANGELOG.md` lists what each kit change needs on the project side.

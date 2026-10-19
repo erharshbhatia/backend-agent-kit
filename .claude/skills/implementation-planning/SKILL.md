@@ -64,7 +64,7 @@ Agents build only the outcome's slice of each phase, in milestone order. Phase t
 
 - Draw the dependency graph in the README and a parallelism chart (which phases can run at once).
 - Two phases may run in parallel only if their **Modules and files** lists don't overlap and the ports between them are already written. Draft shared contracts (port signatures, request/response models) as an early task of the upstream phase so the downstream one can start.
-- Shared hot files (dependency manifest and lock file, `bootstrap.py`, `settings.py`, migrations sequence, shared contract models) belong to one task at a time; name the owner in the ledger.
+- Shared hot files (the canonical list is in `workstream-tracking`, "Shared hot files") belong to one task at a time; name the owner in the ledger.
 - See `multi-agent-development` for worktrees, claiming, and merging.
 
 ## Step 6: After build — "As built"

@@ -11,10 +11,10 @@ Months from now, someone (often another agent) will need to know what changed, w
 
 - **Where:** `docs/changes/YYYY/YYYY-MM-DD-<phase-or-area>-<slug>.md`, e.g. `docs/changes/2027/2027-03-02-p04-order-idempotency.md`. Date-plus-slug names let parallel agents create records without colliding.
 - **When:** start it at Stage 2 of `sdlc-workflow` (the Design section is the design note); finish it at Stage 7.
-- **Template:** `assets/change-record-template.md`. Fill every section; write "None" rather than deleting a section, so readers know it was considered.
+- **Template:** `assets/change-record-template.md` for `phase-task`, `feature`, `integration`, `schema`, `runtime`, `interface`, `model` and `security-sensitive`; `assets/change-record-short-template.md` (about 20 lines) for `bugfix`, `config`, `dependency`, `refactor` and `docs-only`. A change with both kinds of type takes the full one. Fill every section of whichever you use; write "None" rather than deleting a section, so readers know it was considered.
 - **Index:** append one line to `docs/changes/INDEX.md` (newest first):
   `| 2027-03-02 | P04 | phase-task | [Order idempotency](2027/2027-03-02-p04-order-idempotency.md) | ADR-0007 |`
-- **Size:** proportional. A bug fix can be 15 lines; a phase task with a new port can be two pages. Every record still has Verification with the actual commands and results.
+- **Size:** proportional. A short record is about 20 lines; a phase task with a new port can be two pages. Every record still has Verification with the actual commands and results.
 
 What makes a record useful:
 - **Why** is in terms of requirements (`OR-12`), invariants, or observed failures, not "improved code".

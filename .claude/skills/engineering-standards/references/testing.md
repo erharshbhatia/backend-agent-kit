@@ -31,6 +31,8 @@ The scaffold registers two pytest markers (`--strict-markers`): `db` (needs a Po
 
 ## Commands
 
+Shipped by the scaffold's `Makefile`:
+
 | Command | Runs |
 | --- | --- |
 | `make check` | Lint, format check, types, import-linter, guards, and every test not marked `db` or `external` (no Docker, no keys) |
@@ -38,8 +40,7 @@ The scaffold registers two pytest markers (`--strict-markers`): `db` (needs a Po
 | `make test-db` | Tests marked `db`: repository contract suites and other Postgres tests (testcontainers; needs Docker) |
 | `make migrations-check` | `alembic check`: `tables.py` and migrations agree (after `make up && make migrate`) |
 | `make check-all` | `make check` + `make test-db` + `make migrations-check` |
-| `make test-external` | Tests marked `external` (real outside services, e.g. an LLM API; needs keys; add when the test-policy ADR allows real calls) |
-| `make e2e` | End-to-end scenarios |
-| `make eval` | Model evals against labelled sets (if any) |
+| `make test-external` | Tests marked `external` (real outside services, e.g. an LLM API; needs keys and the test-policy ADR). Passes while none exist |
+| `make e2e` | End-to-end scenarios in `tests/scenarios/`, one module per scenario id. The scaffold ships S0 (the service boots and answers); scenarios that use Postgres are marked `db` and need Docker |
 
-<!-- Projects add their own commands (UI checks, scenario runners) here and in project-guide/knowledge/INDEX.md. -->
+Projects add their own and list them in `project-guide/knowledge/INDEX.md`: `make eval` for model evals against labelled sets, UI checks, scenario runners.

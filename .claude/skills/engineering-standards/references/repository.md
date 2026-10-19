@@ -11,18 +11,21 @@ The data-access standard. A project may also keep a longer binding spec (`implem
 ## 2. Structure
 
 ```text
-<package>/persistence/
-  ports/          Protocols only: UnitOfWork + one repository per entity; errors.py; results.py — imports domain types only
+persistence/                      (under the package root)
+  ports/          Protocols only: UnitOfWork + one repository per entity; errors.py (ConcurrencyConflict, LeaseLost);
+                  results.py (Created | Existing, Page) — imports domain types only
   postgres/       the only package allowed to import sqlalchemy / psycopg
     tables.py     SQLAlchemy Core tables: the single source of the schema
     uow.py        PostgresUnitOfWork (one connection + transaction)
-    mappers/      row ↔ domain model, one module per entity
+    mappers/      row ↔ domain model, one module per entity (created with the first entity)
     repositories/ one module per repository, implementing its port
     notifier.py   LISTEN/NOTIFY wake-ups, if used
   memory/         in-memory twins for unit tests (store, uow, repositories)
   migrations/     Alembic, checked against tables.py
 tests/persistence/contracts/   one suite per repository, parameterized over {postgres, memory}
 ```
+
+The scaffold ships `ports/{database,uow,errors,results}.py`, `postgres/{db,tables,uow}.py`, `memory/uow.py` and the migrations folder. `mappers/`, the repository modules and the contract suites arrive with the first entity (§7).
 
 ## 3. Interfaces
 

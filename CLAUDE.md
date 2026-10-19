@@ -8,9 +8,9 @@
 2. **Follow `sdlc-workflow`** for every piece of work (phase task, bug, integration, schema, refactor): orient → intake → design note → plan → build → verify → review → document → close, with its gates.
 3. **Write code to `engineering-standards`**: hexagonal layers, repository pattern with unit of work, registries, typed contracts, clean code, tests at the right layer. Run its review checklist before handing over.
 4. **Document every change** with `change-records` (change record in `docs/changes/`, ADR in `docs/decisions/` for decisions) and keep every design doc true to the code in the same change.
-5. **Keep the ledger** with `workstream-tracking`: claim tasks, record decisions and blockers, and write a handoff entry at the end of every session.
+5. **Keep the ledger** with `workstream-tracking`: read `docs/workstreams/HANDOFF.md` first, claim tasks, record decisions and blockers, and rewrite `HANDOFF.md` at the end of every session.
 6. **Work autonomously.** Do all documentation, doc syncing, verification, audits, and ledger work without asking. Ask the owner only for unmade decisions, approvals that `sdlc-workflow/references/change-types.md` requires, and outward or irreversible actions.
-7. **Run parallel work with `multi-agent-development`**: one task per worktree, claimed in the ledger, exact writable files per agent, throwaway resources per agent, independent review and consistency audits by subagents.
+7. **Run parallel work with `multi-agent-development`**: one task per worktree or throwaway copy, claimed in the ledger, exact writable files per agent, throwaway resources per agent, independent review and consistency audits by subagents.
 
 ## Never
 

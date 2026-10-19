@@ -19,7 +19,7 @@ The default stack is Python 3.12, uv, FastAPI, SQLAlchemy async + psycopg3, Alem
 6. **Errors are values at integration edges.** Integrations return a typed result (success | failure with category); model adapters return typed failures; exceptions are for bugs and infrastructure faults.
 7. **Business logic is pure with respect to storage.** Handlers and domain functions read their inputs and return results or effects; the use case or runtime persists them.
 8. **Inject time and IDs.** `Clock` and `IdGenerator` only; nothing reads the wall clock or generates random IDs inline.
-9. **Speak the project vocabulary.** Use the terms in `project-guide/knowledge/GLOSSARY.md`; retired terms listed there are banned as system names. No tenant or customer words in the core package (`<domain-words>`, enforced by the domain-word guard).
+9. **Speak the project vocabulary.** Use the terms in `project-guide/knowledge/GLOSSARY.md`; retired terms listed there are banned as system names. No tenant or customer words in the core package (the list in `project-guide/knowledge/INVARIANTS.md` #6 and `scripts/guards.toml`, enforced by the domain-word guard).
 10. **Every behaviour has a test at its layer.** Domain unit tests; application tests with fakes and memory repositories; adapter contract tests; end-to-end scenarios. Model calls follow the project's test-policy ADR. → `references/testing.md`
 
 Clean-code conventions (naming, function size, comments, async, logging, config, dependencies) are in `references/clean-code.md`.

@@ -22,6 +22,7 @@ Pick the most specific type; a change can have several (e.g. `feature` + `schema
 
 ## Notes
 
+- **Record size:** `bugfix`, `config`, `dependency`, `refactor` and `docs-only` use the short change record (`change-records/assets/change-record-short-template.md`); every other type uses the full template. A short type combined with a full one (`refactor` + `interface`) takes the full template.
 - **"Approval" means:** show the owner the design note (and ADR if any) and get an explicit go-ahead before Stage 4. Record who approved and when in the change record.
 - **A phase task that simply follows its phase doc** needs no extra approval: the phase doc's decisions are the approval, once its "Decisions to review" are resolved.
 - **Work with no phase doc:** the design lives in the change record; add new requirement IDs with a new prefix to the parent plan's requirements section. Ask for everything needing approval in one message.
