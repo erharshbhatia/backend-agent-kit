@@ -1,4 +1,4 @@
-# backend-agent-kit — rules for working on the kit itself
+# backend-agent-kit: rules for working on the kit itself
 
 This repository is the plugin, not a project built with it. `templates/CLAUDE.md` is what a project gets.
 
@@ -9,7 +9,8 @@ This repository is the plugin, not a project built with it. `templates/CLAUDE.md
 3. **Templates match skills.** A change to a skill that changes what a project must contain (a new ledger file, a new knowledge file, a new target) updates `templates/`, `scaffolds/CONTRACT.md`, every scaffold, and `CHANGELOG.md` with a "Project side" line, in the same change.
 4. **Verify before claiming.** `claude plugin validate .` (the one accepted warning is the root `CLAUDE.md`, which is this file, for people and sessions working on the kit, not plugin context), `scaffolds/check-contract.sh <name>` for every scaffold, and `make check` inside each scaffold must be green; paste the output in the commit message body or the PR.
 5. **Descriptions trigger.** Every `SKILL.md` description says what the skill is and when to use it, in the third person, under 1024 characters.
-6. **Bump and log.** A user-visible change bumps `version` in both manifests and adds a `CHANGELOG.md` entry, newest first.
+6. **Workflows stay generic.** `workflows/*.js` read everything from `args` (repo, scratch, isolation, stack commands, agent type names, tasks) and touch no repository files; the coordinator integrates. Keep `WORKER_REPORT` in `wave.js` identical to `skills/multi-agent-development/references/worker-report-schema.json`.
+7. **Bump and log.** A user-visible change bumps `version` in both manifests and adds a `CHANGELOG.md` entry, newest first.
 
 ## Never
 

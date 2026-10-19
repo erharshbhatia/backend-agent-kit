@@ -18,10 +18,13 @@ Run per worker result, then once per wave.
 
 ## Per wave
 
+- [ ] Fan-in guard: returned equals launched, or every missing task is in `HANDOFF.md` "In flight" with its checkpoint path. Never closed on a partial set.
+- [ ] Anchor agreed with every worker: no task integrated whose `check` the anchor could not reproduce.
+- [ ] More than four reports or twenty findings were batched through subagents; you read summaries, not the pile.
 - [ ] Full `check-all` on the integrated branch. Paste pass/fail counts into the owner update.
 - [ ] End-to-end or scenario tests the phase names, if any.
 - [ ] Consistency audit if three or more docs changed; findings fixed.
-- [ ] `STATUS.md` updated; session log entry written with the next step; `HANDOFF.md` rewritten.
+- [ ] `STATUS.md` updated; session log entry written with the next step; `HANDOFF.md` rewritten, including the "Wave metrics" row.
 - [ ] Worktrees removed only for branches verified merged; unmerged ones listed for the owner.
 - [ ] Owner told: done, running, needs-you (one batch), next.
 

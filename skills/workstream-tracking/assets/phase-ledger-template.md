@@ -44,4 +44,5 @@ From the phase doc's Tasks list, plus any added during planning.
 ### YYYY-MM-DD — <agent/session>
 - Done:
 - Verified:
+- Wave metrics (if a wave ran): launched / returned / lost / verified / must-fix / tokens
 - Next step:

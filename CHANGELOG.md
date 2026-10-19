@@ -2,6 +2,20 @@
 
 Newest first. Each entry says what changed in the kit and what a project bootstrapped earlier has to do to pick it up ("Project side").
 
+## 2026-10-19 — 0.3.0: graph engineering
+
+The kit reviewed against graph-engineering principles (node contracts, real edges only, fresh verifiers, anchors, fan-in guards, caps). It was strong on anchors, isolation and human gates, weak on topology. This release fixes the topology.
+
+- **Wave as code.** `workflows/wave.js` for the Workflow tool, run by `/backend-agent-kit:wave`: one `kit-worker` per task capped by `max_agents`, a schema-enforced worker report, a fresh anchor agent that re-runs `check` in each workspace, fresh `kit-reviewer`s per task (three lenses and majority for heavy change types), a fan-in guard that counts returned against launched, verdicts and ledger rows computed in plain code, a metrics object. Results stay inside the script. Integration stays with the coordinator.
+- **Node contract.** `multi-agent-development/references/worker-report-schema.json`: the worker's output shape. The prompt template and `kit-worker` return it; prose is one field.
+- **Anchored review.** `kit-reviewer` re-runs `check` before judging the diff; a green it cannot reproduce is a must-fix. Three lenses mapped onto the review checklist sections. `sdlc-workflow` Stage 6 uses the same rule.
+- **"Do you need a wave?"** opens `multi-agent-development`: fewer than three independent tasks, exploration, step-by-step approval, or a real chain means one agent, not a wave.
+- **Real edges only at task close.** Stages 6 and 7 and the audit run in parallel; bootstrap steps 5 and 6 too.
+- **Fan-in guard and layered fan-in.** A wave never closes on a partial set; more than four reports or twenty findings are batched through subagents.
+- **Caps and metrics.** `max_agents` and an optional budget per wave; a "Wave metrics" table in `HANDOFF.md` and a line in the ledger session log. This table is the kit's benchmark.
+
+Project side: add the "Wave metrics" section to `HANDOFF.md`; workers now return the JSON report (update any local prompt copies); reviews of heavy change types use three reviewers; use `/backend-agent-kit:wave` for waves.
+
 ## 2026-10-19 — 0.2.0: plugin layout, stack profiles, hooks and agents
 
 - **Plugin layout.** Skills moved to `skills/`, manifests in `.claude-plugin/` (plus a Codex manifest). Install with `/plugin marketplace add erharshbhatia/backend-agent-kit` and `/plugin install backend-agent-kit@backend-agent-kit`. Generic skills are now upgraded with `/plugin update`; nothing project-specific lives in them.

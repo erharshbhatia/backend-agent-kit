@@ -44,14 +44,11 @@ If you need a change there, put the exact snippet in your report under "Needs fr
 - Look before overwriting or deleting anything. Never print or commit secrets or .env.
 - Do not commit to <target branch>, push, or call external services.
 
-## Report (≤ 300 words)
-- Status: done / partial / blocked
-- Files changed (with line counts)
-- Verification: commands + pass/fail counts
-- Change record path; ledger row text you want; INDEX row text you want
-- Patch paths (copy mode): main, shared, last checkpoint
-- Needs from coordinator (snippets for shared files), decisions needed, follow-ups
-- Judgment calls and deviations
+## Report
+Return the worker report as one JSON object matching `multi-agent-development/references/worker-report-schema.json`
+(task_id, status, summary, files_changed, verification with exit codes and counts, change_record, patches {main, shared, checkpoint},
+workspace, ledger_row, index_row, needs_from_coordinator, decisions_needed, deviations), then at most 150 words of prose.
+The summary field is the only prose inside the object. An anchor agent will re-run `check` in your workspace.
 ```
 
 ## Variants

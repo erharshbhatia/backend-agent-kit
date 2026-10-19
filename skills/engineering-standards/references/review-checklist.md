@@ -2,6 +2,8 @@
 
 Use it on your own diff before handing over, and when reviewing someone else's. Every "no" needs a fix or a written reason in the change record. Tool and command names are the abstract ones from `project-guide/knowledge/STACK.md`.
 
+Review lenses (`multi-agent-development`, three fresh reviewers for heavy change types): **correctness** = Correctness + Security; **invariants** = Design + Data + Documentation; **tests** = Tests + Code quality. One reviewer with no lens covers all sections.
+
 ## Design
 - [ ] Code sits in the layer and module the phase doc / `lld.md` §5 names; dependencies point inward.
 - [ ] New behaviour added through a registry or port, not a branch in central code.

@@ -27,11 +27,11 @@ Ask in **one batch**, each question with the doc's recommended default. When you
 
 ## Use subagents
 
-- **Parallel work:** independent tasks can run in parallel subagents. Each claims its own task in the ledger first, works only in the files its task owns, and writes its own change record; the coordinating agent merges ledger and index updates at the end. The mechanics (worktrees or throwaway copies, ports, databases, merging) are in `multi-agent-development`.
+- **Parallel work:** independent tasks can run in parallel subagents (`/backend-agent-kit:wave`; first apply "Do you need a wave?" in `multi-agent-development`). Each claims its own task in the ledger first, works only in the files its task owns, and writes its own change record; the coordinating agent merges ledger and index updates at the end. The mechanics (worktrees or throwaway copies, ports, databases, merging) are in `multi-agent-development`.
 - **Consistency audit:** after any change that touches three or more docs, or before closing a phase, spawn a read-only reviewer subagent to cross-check the HLD, `implementation/`, `docs/`, and the skills for contradictions, stale references, and broken links; fix what it finds before Stage 8.
 - **Independent review:** for change types that need review (Stage 6), a fresh subagent running the review checklist is a valid reviewer.
 - Give each subagent the exact files it may write; everything else is read-only for it.
-- **Audit recipe** (the only copy; `multi-agent-development` links here): use a general-purpose or planning subagent (not a search-only one, which only locates). Prompt: "Read-only. For terms/sections <list>, cross-check `tech-doc.md`, `docs/site/hld.html` (if the project publishes one), `implementation/*`, `.claude/skills/**`, `docs/decisions/INDEX.md`, `docs/workstreams/*`, and the code under <paths>. Report contradictions, stale values, dead paths and links as file:line → proposed text. Ignore `docs/changes/*`, archived docs, and superseded ADRs." Split large sweeps across several subagents by doc group.
+- **Audit recipe** (the only copy; `multi-agent-development` links here): use a general-purpose or planning subagent (not a search-only one, which only locates). Prompt: "Read-only. For terms/sections <list>, cross-check `tech-doc.md`, `docs/site/hld.html` (if the project publishes one), `implementation/*`, `.claude/skills/**`, `docs/decisions/INDEX.md`, `docs/workstreams/*`, and the code under <paths>. Report contradictions, stale values, dead paths and links as file:line → proposed text. Ignore `docs/changes/*`, archived docs, and superseded ADRs." Split large sweeps across several subagents by doc group, and fan their results in layered: more than four reports or twenty findings go to one fixer subagent per batch; you read the batch summaries, never the raw pile.
 
 ## Stage 0: Orient
 - Use the `project-guide` skill; skim `INVARIANTS.md`.
@@ -72,9 +72,11 @@ Ask in **one batch**, each question with the doc's recommended default. When you
 - Never run tests against a shared or developer database you don't own; use a throwaway database (a test container or a per-agent instance).
 - **Gate:** all checks green, or failures documented with the owner informed.
 
+Stages 6 and 7 and the consistency audit do not need each other's output. Run them at once: a reviewer subagent, the doc sync, and an auditor subagent in parallel; Stage 8 waits for all three.
+
 ## Stage 6: Review
 - Self-review with `engineering-standards/references/review-checklist.md`; fix findings.
-- For changes of type `feature`, `schema`, `runtime`, `interface`, or `security-sensitive`, also get an independent review (a code-review skill, a fresh read-only subagent given the change record's file list, or a human) and resolve findings.
+- For changes of type `feature`, `schema`, `runtime`, `interface`, or `security-sensitive`, also get an independent review: fresh read-only reviewers (`backend-agent-kit:kit-reviewer`, or a human) given the workspace, the change record and the acceptance criteria, never your conversation. Three reviewers with different lenses (correctness, invariants, tests; lens map at the top of the checklist), majority decides. Each reviewer re-runs `check` first; a green you claimed that they cannot reproduce is a must-fix.
 - **Gate:** checklist clean or deviations justified in the change record; review findings resolved.
 
 ## Stage 7: Document

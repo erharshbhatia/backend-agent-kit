@@ -77,6 +77,8 @@ Follow `tech-doc-writing`, then `implementation-planning`. The plan must name P0
 
 ## 6. Ledgers
 
+Steps 5 and 6 need only the plan, not each other: do them at once.
+
 Create from `workstream-tracking/assets/` (or keep the copies from `templates/docs/workstreams/`). `STATUS.md` names the current outcome and lists every phase; `HANDOFF.md` names the isolation mode and the off-limits resources from ADR-0005/0006. `P00-foundations.md` gets the checklist below as its task list.
 
 ## 7. P00 foundations checklist

@@ -59,6 +59,7 @@ Then `/backend-agent-kit:bootstrap my-service python-service`. The `project-boot
 | --- | --- |
 | `skills/` | The eight process skills (below); loaded by Claude Code when relevant |
 | `commands/` | `/backend-agent-kit:bootstrap`, `:status`, `:handoff`, `:audit`, `:wave` |
+| `workflows/wave.js` | The wave as code for the Workflow tool: one worker per task with a schema-enforced report, a fresh anchor that re-runs `check`, fresh reviewers (three lenses with majority for heavy changes), a fan-in guard, metrics. Results never pass through the coordinator's context |
 | `agents/` | `kit-worker`, `kit-reviewer`, `kit-auditor`, `kit-integrator`: the roles `multi-agent-development` describes |
 | `hooks/` | SessionStart: points the session at `HANDOFF.md`. PreToolUse on Bash: blocks `pkill`, force pushes, volume deletes, database drops, hard resets in kit projects (owner escape hatch: `KIT_ALLOW=1`) |
 | `templates/` | What bootstrap copies into a project and the project then owns: `CLAUDE.md`, the `project-guide` skill with its knowledge files (`INDEX`, `INVARIANTS`, `STACK`, `ARCHITECTURE`, `PRODUCT`, `GLOSSARY`, `DEBUGGING`), empty ledgers, indexes |
@@ -76,7 +77,7 @@ Then `/backend-agent-kit:bootstrap my-service python-service`. The `project-boot
 | `engineering-standards` | The ten rules (layers, repository + unit of work, registries, typed contracts, errors as values, injected time and ids, tests per layer), the review checklist, and one profile per stack |
 | `change-records` | One change record per change, ADRs for decisions, commit format, comment rules, docs stay true |
 | `workstream-tracking` | `HANDOFF.md`, `STATUS.md`, per-phase ledgers, open decisions, claiming tasks, the shared-hot-files list |
-| `multi-agent-development` | Running parallel agents: worktree or copy isolation, waves sized for limits, file ownership, integration, review and audit agents |
+| `multi-agent-development` | Running parallel agents: the wave-or-not test, worktree or copy isolation, node contracts, waves sized for limits and caps, anchored three-lens review, fan-in guard, layered fan-in, integration |
 
 The project-specific `project-guide` skill is not in the plugin: bootstrap writes it into each project, because its content (invariants, glossary, stack, architecture) belongs to that project.
 
@@ -110,6 +111,14 @@ docs/workstreams/HANDOFF.md + STATUS.md + PNN-*.md   resume point, who is doing 
         ▼
 code + tests + docs/changes/* + docs/decisions/*
 ```
+
+## Graph, not chain
+
+A wave is a diamond: fan out one worker per independent task, reduce in plain code, verify with fresh agents that never saw the worker's chat, synthesize for the coordinator. The pieces that keep it honest are anchors the agents cannot argue with: the `check` command re-run by a separate agent, invariants changeable only by ADR, pasted command output, and the hook that blocks the dangerous commands. `multi-agent-development` opens with the test for when a wave is the wrong tool.
+
+## Benchmark
+
+There is no benchmark yet, only a baseline. Herald, the first project built with the kit, reached 1,335 unit, 271 database and 22 end-to-end tests in four days, lost six workers at once to a usage limit, and fanned 70 audit findings in by hand. Every wave now writes a metrics row into `HANDOFF.md` (launched, returned, lost, verified, anchor-red, must-fix findings, agents, tokens, `check-all` after integration). Those rows, across projects, are the benchmark. Claims about speed or cost that are not in that table are not claims the kit makes.
 
 ## Updating a project from a newer kit
 

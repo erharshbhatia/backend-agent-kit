@@ -1,0 +1,20 @@
+{
+  "$comment": "The worker node's output contract. Mirror of WORKER_REPORT in workflows/wave.js; keep the two identical. A worker that returns prose instead of this object has not finished.",
+  "type": "object",
+  "required": ["task_id", "status", "summary", "files_changed", "verification", "patches", "needs_from_coordinator", "deviations"],
+  "properties": {
+    "task_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["done", "partial", "blocked"] },
+    "summary": { "type": "string", "description": "Two or three sentences. The only prose field." },
+    "files_changed": { "type": "array", "items": { "type": "object", "required": ["path"], "properties": { "path": { "type": "string" }, "lines": { "type": "integer" } } } },
+    "verification": { "type": "array", "items": { "type": "object", "required": ["command", "exit_code"], "properties": { "command": { "type": "string" }, "exit_code": { "type": "integer" }, "passed": { "type": "integer" }, "failed": { "type": "integer" } } } },
+    "change_record": { "type": "string", "description": "Path of the change record inside the copy or worktree." },
+    "patches": { "type": "object", "properties": { "main": { "type": "string" }, "shared": { "type": "string" }, "checkpoint": { "type": "string" } } },
+    "workspace": { "type": "string", "description": "Absolute path of the copy or worktree the work is in." },
+    "ledger_row": { "type": "string" },
+    "index_row": { "type": "string" },
+    "needs_from_coordinator": { "type": "array", "items": { "type": "string" } },
+    "decisions_needed": { "type": "array", "items": { "type": "string" } },
+    "deviations": { "type": "array", "items": { "type": "string" } }
+  }
+}

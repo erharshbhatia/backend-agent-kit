@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "backend-agent-kit",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": { "source": "github", "repo": "erharshbhatia/backend-agent-kit" },
       "description": "Tech doc to plan to phased multi-agent build, with ledgers, change records, ADRs and enforced engineering standards.",
       "homepage": "https://github.com/erharshbhatia/backend-agent-kit",

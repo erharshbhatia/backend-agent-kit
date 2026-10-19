@@ -9,6 +9,19 @@ One coordinator agent plans, splits, launches, integrates, and reports. Worker a
 
 Use this together with `sdlc-workflow` (every worker still follows the lifecycle), `workstream-tracking` (claims, ledger, handoff), and `change-records` (one record per task).
 
+## Do you need a wave?
+
+A wave buys width, not judgment. Run the edge test on the candidate tasks: does task B need anything task A produces (a port, a model, a migration, a file)? If yes, that is a real edge and they are sequential. Count the tasks left with no edge between them and no shared files.
+
+| Situation | Do this instead |
+| --- | --- |
+| Fewer than three independent tasks | One agent, one task after another. The coordination costs more than it saves |
+| The owner wants to approve each step | One agent they can steer; a wave's point is running without them |
+| Nobody knows yet what the work is (exploration, a bug whose cause is unknown) | One agent, a loop: try, check, adjust |
+| Every task depends on the previous one | A loop; the chain is real |
+
+Three or more independent tasks with disjoint files, decisions resolved, and a coordinator who will not touch them while they run: that is a wave.
+
 ## Roles
 
 | Role | Does | Never does |
@@ -23,13 +36,13 @@ Use this together with `sdlc-workflow` (every worker still follows the lifecycle
 
 1. **Orient.** Read `docs/workstreams/STATUS.md`, the phase ledgers, `OPEN-DECISIONS.md`. Know what is in progress and by whom.
 2. **Resolve decisions first.** Collect every open decision the planned tasks depend on and ask the owner in **one** message, each with a recommended default. Don't launch workers on unresolved decisions.
-3. **Split into tasks.** Each task: one change type, one acceptance list, a known file set. Prefer vertical slices that end green. Size: one worker, a few hours of agent time.
-4. **Group into waves.** Tasks in a wave run at the same time and must not share files. Tasks that depend on a port, model, or migration another task creates go in a later wave. See "Waves" below.
+3. **Split into tasks.** A task is a node: one bounded job, a defined input (the prompt), a defined output (the worker report, `references/worker-report-schema.json`). Each task: one change type, one acceptance list, a known file set. Prefer vertical slices that end green. Size: one worker, at most a couple of hours of agent time; a task that needs a day is two nodes with an edge, not one.
+4. **Group into waves.** Tasks in a wave run at the same time and must not share files. Tasks that depend on a port, model, or migration another task creates go in a later wave. Set the wave's caps before launching: `max_agents` (default 4) and, when the owner gave one, a token or cost budget; write both in the ledger session log. See "Waves" below.
 5. **Claim.** For each task, add or update its ledger row: status `in progress`, owner (`Claude (subagent, <task>)`), date, and `Touches` (exact paths or globs). Do this before launching, so parallel sessions see it.
-6. **Launch.** One worker per task, each in its own worktree (`isolation: "worktree"`), each with a self-contained prompt from `references/subagent-prompt-template.md`. Launch a wave's workers in one message so they run concurrently.
+6. **Launch.** Preferred: `/backend-agent-kit:wave`, which runs `workflows/wave.js`: one worker per task in its own copy or worktree, a fresh anchor agent that re-runs `check` in each workspace, fresh reviewers per task, and a fan-in guard, all coordinated in code so results never pass through your context. Fallback without the Workflow tool: one worker per task with a self-contained prompt from `references/subagent-prompt-template.md`, launched in one message; you are then the anchor, the fan-in guard and the reviewer launcher.
 7. **Wait, don't duplicate.** While workers run, don't do their work yourself. Answer the owner's questions, prepare the next wave's prompts, or run audits on finished work. Never guess a running worker's results.
-8. **Integrate.** As each worker reports: read its report and change record, review the diff, integrate it onto the target branch (see "Integrating"), run checks, then mark the ledger row.
-9. **Review.** For change types that need review, launch a read-only reviewer per task. Fix or send back findings.
+8. **Integrate.** As each task comes back `verified`: read its report and change record, integrate it onto the target branch (see "Integrating"), run the touched checks yourself, then mark the ledger row. Count: returned versus launched. A wave is never closed on a partial set; every missing task is listed in `HANDOFF.md` "In flight" with its checkpoint path.
+9. **Review.** Every task gets a fresh reviewer that first re-runs `check` in the workspace (the anchor) and then judges the diff. Heavy change types (`feature`, `schema`, `runtime`, `interface`, `security-sensitive`) get three reviewers with different lenses (correctness, invariants, tests; the lens map is at the top of the review checklist) and a majority decides. Must-fix findings go back to the same worker; you do not fix them yourself.
 10. **Audit.** After a wave that touched three or more docs, run a consistency audit (recipe below). Fix what it finds.
 11. **Close.** Full suite on the integrated branch, ledger and STATUS updated, handoff entry written, owner told what's done, what's next, and what needs their decision.
 
@@ -96,7 +109,8 @@ Template: `references/subagent-prompt-template.md`.
 
 ## Review and audit subagents
 
-- **Independent review:** a fresh read-only subagent, given the task's change record and diff (or file list), runs `engineering-standards/references/review-checklist.md` and reports findings as `file:line → issue → proposed fix`, ranked. Fix must-fix items before integration closes.
+- **Independent review:** a fresh read-only subagent (`backend-agent-kit:kit-reviewer`), given the workspace, the change record and the acceptance criteria, never the worker's chat. It re-runs `check` first, then judges the diff through its lens and reports `where → issue → fix`, ranked, with an integrate-as-is verdict. Three lenses and a majority for heavy change types. Must-fix items go back to the worker before integration closes.
+- **Layered fan-in:** more than four reports, or more than twenty findings, never land in your context raw. Batch them (by task or by doc group), give each batch to one subagent that applies or summarizes it, and read the summaries only. Herald's two audits returned 70 findings; the batch that was not delegated cost a session.
 - **Consistency audit:** the recipe (prompt, scope, what to ignore) is in `sdlc-workflow`, "Use subagents"; run it as written there after any wave that touched three or more docs, split across several auditors by doc group.
 - **Code mapping:** to answer "how does X work" across many files, delegate to one read-only agent and keep only its conclusions.
 
@@ -130,6 +144,7 @@ The owner should never have to ask "what's happening". Each update, short:
 
 - **Running:** which workers, on what, since when.
 - **Done:** what landed, with check results.
+- **Wave metrics:** launched, returned, lost, verified, needs-fixes, anchor-red (worker claimed green, anchor said red), must-fix findings, agents used, tokens. The same row goes into `HANDOFF.md`; it is the kit's benchmark.
 - **Needs you:** decisions, approvals, irreversible actions, in one batch with recommended defaults.
 - **Next:** the next wave.
 

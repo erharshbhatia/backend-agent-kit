@@ -29,6 +29,14 @@
 
 1. <The exact first thing the next session does.>
 
+## Wave metrics
+
+<!-- One row per wave, newest first. This is the kit's benchmark: the only numbers that say whether the process is getting better. anchor-red = the worker claimed green and the anchor's re-run of `check` disagreed. -->
+
+| Wave | Date | Launched | Returned | Lost | Verified | Needs fixes | Anchor red | Must-fix findings | Agents | Tokens | `check-all` after integration |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| | | | | | | | | | | | |
+
 ## Gotchas
 
 <!-- What bit this session and is still true: port clashes, lock-file merges, a doc that disagrees with the code. Delete a line when it is fixed. -->
