@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "backend-agent-kit",
+  "version": "0.2.0",
+  "description": "Process-as-skills kit for building backend services with many Claude Code agents in parallel: tech doc, implementation plan, phased build tracked in ledgers, change records, ADRs, multi-agent rules, and stack scaffolds that enforce the standards.",
+  "author": { "name": "Harsh Bhatia", "url": "https://github.com/erharshbhatia" },
+  "homepage": "https://github.com/erharshbhatia/backend-agent-kit",
+  "repository": "https://github.com/erharshbhatia/backend-agent-kit",
+  "license": "MIT",
+  "keywords": ["skills", "agents", "multi-agent", "backend", "sdlc", "hexagonal-architecture", "adr", "scaffold"]
+}

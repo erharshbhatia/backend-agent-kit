@@ -1,22 +1,19 @@
-# <Project> — rules for every agent
+# backend-agent-kit — rules for working on the kit itself
 
-<One or two sentences: what this service does, its core idea, and its main stack. Design lives in `tech-doc.md` and `implementation/`.>
+This repository is the plugin, not a project built with it. `templates/CLAUDE.md` is what a project gets.
 
 ## Always
 
-1. **Orient first** with the `project-guide` skill (read `.claude/skills/project-guide/knowledge/INDEX.md` and `INVARIANTS.md`) before planning, coding, reviewing, or answering design questions.
-2. **Follow `sdlc-workflow`** for every piece of work (phase task, bug, integration, schema, refactor): orient → intake → design note → plan → build → verify → review → document → close, with its gates.
-3. **Write code to `engineering-standards`**: hexagonal layers, repository pattern with unit of work, registries, typed contracts, clean code, tests at the right layer. Run its review checklist before handing over.
-4. **Document every change** with `change-records` (change record in `docs/changes/`, ADR in `docs/decisions/` for decisions) and keep every design doc true to the code in the same change.
-5. **Keep the ledger** with `workstream-tracking`: read `docs/workstreams/HANDOFF.md` first, claim tasks, record decisions and blockers, and rewrite `HANDOFF.md` at the end of every session.
-6. **Work autonomously.** Do all documentation, doc syncing, verification, audits, and ledger work without asking. Ask the owner only for unmade decisions, approvals that `sdlc-workflow/references/change-types.md` requires, and outward or irreversible actions.
-7. **Run parallel work with `multi-agent-development`**: one task per worktree or throwaway copy, claimed in the ledger, exact writable files per agent, throwaway resources per agent, independent review and consistency audits by subagents.
+1. **Generic stays generic.** Nothing under `skills/` names a project, a package, an env prefix, a vendor, or a concrete tool or command. Skills use the abstract names of `templates/project-guide/knowledge/STACK.md` (`check`, `deps-sync`, "the composition root", "the atomic claim primitive"). Stack specifics go in `skills/engineering-standards/references/stacks/<profile>.md` and `scaffolds/<name>/`.
+2. **One canonical copy.** The shared-hot-files list lives in `workstream-tracking`; the audit recipe in `sdlc-workflow`; the isolation modes in `multi-agent-development`. Other skills link, never copy.
+3. **Templates match skills.** A change to a skill that changes what a project must contain (a new ledger file, a new knowledge file, a new target) updates `templates/`, `scaffolds/CONTRACT.md`, every scaffold, and `CHANGELOG.md` with a "Project side" line, in the same change.
+4. **Verify before claiming.** `claude plugin validate .` (the one accepted warning is the root `CLAUDE.md`, which is this file, for people and sessions working on the kit, not plugin context), `scaffolds/check-contract.sh <name>` for every scaffold, and `make check` inside each scaffold must be green; paste the output in the commit message body or the PR.
+5. **Descriptions trigger.** Every `SKILL.md` description says what the skill is and when to use it, in the third person, under 1024 characters.
+6. **Bump and log.** A user-visible change bumps `version` in both manifests and adds a `CHANGELOG.md` entry, newest first.
 
 ## Never
 
-- Break an invariant in `.claude/skills/project-guide/knowledge/INVARIANTS.md` without an accepted ADR and the owner's agreement.
-- Build a task whose governing "Decisions to review" are unresolved; ask the owner in one batch (`sdlc-workflow` Stage 1). Decisions already settled by accepted ADRs are reconciled without asking.
-- Put tenant, customer, or workflow-specific concepts (<domain-words>) in the core package `<package>/`.
-- Use retired vocabulary as system terms (listed in `GLOSSARY.md`): <retired terms>.
-- Report checks as passing without having run them; paste real results into the change record.
-- Commit or push unless the owner asks. Never commit secrets or `.env`.
+- Put `<Project>`, `<package>`, `<PREFIX>`, `<domain-words>` or `<vendor>` placeholders in `skills/`; they belong in `templates/` and scaffold `BOOTSTRAP.md` files only.
+- Use em-dashes in prose; tables and short sentences instead.
+- Report checks as passing without having run them.
+- Commit or push unless the owner asks.

@@ -1,0 +1,10 @@
+{
+  "name": "backend-agent-kit",
+  "version": "0.2.0",
+  "description": "Process-as-skills kit for multi-agent backend development: tech doc, plan, phased build, ledgers, change records, ADRs, and stack scaffolds that enforce the standards.",
+  "author": { "name": "Harsh Bhatia", "url": "https://github.com/erharshbhatia" },
+  "homepage": "https://github.com/erharshbhatia/backend-agent-kit",
+  "repository": "https://github.com/erharshbhatia/backend-agent-kit",
+  "license": "MIT",
+  "skills": "./skills/"
+}
