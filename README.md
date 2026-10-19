@@ -151,6 +151,10 @@ There is no benchmark yet, only a baseline, and the kit will not pretend otherwi
 
 `/plugin update backend-agent-kit`, then read the `CHANGELOG.md` entries since the version recorded in the project's `project-guide/knowledge/INDEX.md` and do their "Project side" items. The plugin's skills carry nothing project-specific, so the update never touches the project's files.
 
+## Contributing
+
+Most useful, in order: a wave metrics row from real work, a new stack (TypeScript and Go are open), a skill fix with the failure that motivated it. See `CONTRIBUTING.md`. MIT licensed.
+
 ## Working on the kit itself
 
 See `CLAUDE.md` at the root of this repository.
