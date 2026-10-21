@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+  </defs>
+  <rect width="900" height="560" fill="#ffffff"/>
+
+  <text x="15" y="28" font-size="15" font-weight="700" fill="#0f172a">1. The project: five steps, each leaves a file the next agent can read</text>
+  <g font-size="13" text-anchor="middle" fill="#0f172a">
+    <rect x="15" y="44" width="150" height="62" rx="8" fill="#e0f2fe" stroke="#0284c7"/>
+    <text x="90" y="70" font-weight="700">Tech doc</text><text x="90" y="90" font-size="11">requirements, estimates</text>
+    <rect x="195" y="44" width="150" height="62" rx="8" fill="#e0f2fe" stroke="#0284c7"/>
+    <text x="270" y="70" font-weight="700">Plan + phases</text><text x="270" y="90" font-size="11">tasks, decisions to review</text>
+    <rect x="375" y="44" width="150" height="62" rx="8" fill="#fef3c7" stroke="#d97706"/>
+    <text x="450" y="70" font-weight="700">Wave (below)</text><text x="450" y="90" font-size="11">parallel agents</text>
+    <rect x="555" y="44" width="150" height="62" rx="8" fill="#e0f2fe" stroke="#0284c7"/>
+    <text x="630" y="70" font-weight="700">Integrate</text><text x="630" y="90" font-size="11">merge, run all checks</text>
+    <rect x="735" y="44" width="150" height="62" rx="8" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="810" y="70" font-weight="700">Record</text><text x="810" y="90" font-size="11">change record, ADR</text>
+  </g>
+  <g stroke="#475569" stroke-width="1.6" marker-end="url(#a)">
+    <line x1="165" y1="75" x2="193" y2="75"/><line x1="345" y1="75" x2="373" y2="75"/>
+    <line x1="525" y1="75" x2="553" y2="75"/><line x1="705" y1="75" x2="733" y2="75"/>
+  </g>
+  <path d="M810,106 V128 H90 V110" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="450" y="146" font-size="11" text-anchor="middle" fill="#64748b">next session starts from HANDOFF.md, the ledgers and the decision records, not from memory</text>
+
+  <text x="15" y="190" font-size="15" font-weight="700" fill="#0f172a">2. The wave: the same diamond every time</text>
+  <g font-size="13" text-anchor="middle" fill="#0f172a">
+    <rect x="15" y="290" width="130" height="70" rx="8" fill="#fef3c7" stroke="#d97706"/>
+    <text x="80" y="320" font-weight="700">Ledger</text><text x="80" y="340" font-size="11">3 independent tasks</text>
+
+    <rect x="185" y="215" width="130" height="56" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="250" y="240" font-weight="700">Worker T1</text><text x="250" y="258" font-size="11">own copy, own DB</text>
+    <rect x="185" y="297" width="130" height="56" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="250" y="322" font-weight="700">Worker T2</text><text x="250" y="340" font-size="11">own copy, own DB</text>
+    <rect x="185" y="379" width="130" height="56" rx="8" fill="#e0f2fe" stroke="#0284c7"/><text x="250" y="404" font-weight="700">Worker T3</text><text x="250" y="422" font-size="11">own copy, own DB</text>
+
+    <rect x="355" y="215" width="130" height="56" rx="8" fill="#fee2e2" stroke="#dc2626"/><text x="420" y="240" font-weight="700">Anchor</text><text x="420" y="258" font-size="11">re-runs the checks</text>
+    <rect x="355" y="297" width="130" height="56" rx="8" fill="#fee2e2" stroke="#dc2626"/><text x="420" y="322" font-weight="700">Anchor</text><text x="420" y="340" font-size="11">re-runs the checks</text>
+    <rect x="355" y="379" width="130" height="56" rx="8" fill="#fee2e2" stroke="#dc2626"/><text x="420" y="404" font-weight="700">Anchor</text><text x="420" y="422" font-size="11">re-runs the checks</text>
+
+    <rect x="525" y="215" width="130" height="56" rx="8" fill="#f3e8ff" stroke="#9333ea"/><text x="590" y="240" font-weight="700">Fresh reviewers</text><text x="590" y="258" font-size="11">majority vote</text>
+    <rect x="525" y="297" width="130" height="56" rx="8" fill="#f3e8ff" stroke="#9333ea"/><text x="590" y="322" font-weight="700">Fresh reviewers</text><text x="590" y="340" font-size="11">majority vote</text>
+    <rect x="525" y="379" width="130" height="56" rx="8" fill="#f3e8ff" stroke="#9333ea"/><text x="590" y="404" font-weight="700">Fresh reviewers</text><text x="590" y="422" font-size="11">majority vote</text>
+
+    <rect x="695" y="290" width="190" height="70" rx="8" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="790" y="316" font-weight="700">Count in code</text><text x="790" y="336" font-size="11">returned = launched?</text><text x="790" y="352" font-size="11">verified / fix / lost per task</text>
+  </g>
+  <g stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <path d="M145,325 C165,325 165,243 183,243"/><line x1="145" y1="325" x2="183" y2="325"/><path d="M145,325 C165,325 165,407 183,407"/>
+    <line x1="315" y1="243" x2="353" y2="243"/><line x1="315" y1="325" x2="353" y2="325"/><line x1="315" y1="407" x2="353" y2="407"/>
+    <line x1="485" y1="243" x2="523" y2="243"/><line x1="485" y1="325" x2="523" y2="325"/><line x1="485" y1="407" x2="523" y2="407"/>
+    <path d="M655,243 C675,243 675,325 693,325"/><line x1="655" y1="325" x2="693" y2="325"/><path d="M655,407 C675,407 675,325 693,325"/>
+  </g>
+
+  <rect x="15" y="462" width="870" height="82" rx="8" fill="#f8fafc" stroke="#cbd5e1"/>
+  <g font-size="12" fill="#0f172a">
+    <text x="30" y="485"><tspan font-weight="700">Worker:</tspan> builds one task, returns a fixed-shape report. Its "all green" is only a claim.</text>
+    <text x="30" y="505"><tspan font-weight="700" fill="#dc2626">Anchor:</tspan> a separate agent runs the checks itself. The exit code is the evidence.</text>
+    <text x="30" y="525"><tspan font-weight="700" fill="#9333ea">Reviewers:</tspan> never saw the worker's chat. Risky changes get three reviewers with different questions.</text>
+  </g>
+</svg>
